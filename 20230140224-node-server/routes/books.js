@@ -1,64 +1,59 @@
-
 const express = require('express');
 const router = express.Router();
 
-let books = []; // penyimpanan sementara (array)
+let books = [
+  { id: 1, title: 'Book 1', author: 'Author 1' },
+  { id: 2, title: 'Book 2', author: 'Author 2' }
+];
 
+// ✅ GET semua buku
+router.get('/', (req, res) => {
+  res.json(books);
+});
 
+// ✅ GET satu buku berdasarkan ID
+router.get('/:id', (req, res) => {
+  const book = books.find(b => b.id === parseInt(req.params.id));
+  if (!book) return res.status(404).json({ message: 'Book not found' });
+  res.json(book);
+});
+
+// ✅ POST - tambah buku baru
 router.post('/add', (req, res) => {
   const { title, author } = req.body;
-
   if (!title || !author) {
-    return res.status(400).json({ message: 'Title dan author wajib diisi' });
+    return res.status(400).json({ message: 'Title and author are required' });
   }
-
-  const newBook = { id: books.length + 1, title, author };
-  books.push(newBook);
-
-  res.status(201).json({ message: 'Buku berhasil ditambahkan', data: newBook });
+  const book = {
+    id: books.length + 1,
+    title,
+    author
+  };
+  books.push(book);
+  res.status(201).json(book);
 });
 
-
-// READ: GET /api/books
-router.get('/', (req, res) => {
-  res.json({ message: 'Daftar semua buku', data: books });
-});
-
-// UPDATE: PUT /api/books/:id
+// ✅ PUT - update buku berdasarkan ID
 router.put('/:id', (req, res) => {
-  const { id } = req.params;
+  const book = books.find(b => b.id === parseInt(req.params.id));
+  if (!book) return res.status(404).json({ message: 'Book not found' });
+
   const { title, author } = req.body;
-
-  const book = books.find(b => b.id === parseInt(id));
-  if (!book) {
-    return res.status(404).json({ message: 'Buku tidak ditemukan' });
-  }
-
-  if (!title && !author) {
-    return res.status(400).json({ message: 'Minimal isi salah satu field untuk update' });
-  }
-
   if (title) book.title = title;
   if (author) book.author = author;
 
-  res.json({ message: 'Buku berhasil diperbarui', data: book });
+  res.json({ message: 'Book updated successfully', book });
 });
 
-// DELETE: DELETE /api/books/:id
+// ✅ DELETE - hapus buku berdasarkan ID
 router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  const index = books.findIndex(b => b.id === parseInt(id));
-
-  if (index === -1) {
-    return res.status(404).json({ message: 'Buku tidak ditemukan' });
+  const bookIndex = books.findIndex(b => b.id === parseInt(req.params.id));
+  if (bookIndex === -1) {
+    return res.status(404).json({ message: 'Book not found' });
   }
 
-  books.splice(index, 1);
-  res.json({ message: 'Buku berhasil dihapus' });
-});
-
-router.put('/test', (req, res) => {
-  res.json({ message: 'PUT test berhasil' });
+  const deletedBook = books.splice(bookIndex, 1);
+  res.json({ message: 'Book deleted successfully', deletedBook });
 });
 
 module.exports = router;
