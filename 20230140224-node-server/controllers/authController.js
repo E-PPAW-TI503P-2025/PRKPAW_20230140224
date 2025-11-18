@@ -5,19 +5,22 @@ const JWT_SECRET = 'INI_ADALAH_KUNCI_RAHASIA_ANDA_YANG_SANGAT_AMAN';// ntr pinda
 
 exports.register = async (req, res) => {
   try {
-    const { nama, email, password, role } = req.body;
+    // KOREKSI 1: Ambil 'name' dari req.body, bukan 'nama'
+    const { name, email, password, role } = req.body; 
 
-    if (!nama || !email || !password) {
+    // KOREKSI 2: Validasi menggunakan variabel 'name'
+    if (!name || !email || !password) { 
       return res.status(400).json({ message: "Nama, email, dan password harus diisi" });
     }
-
+    
     if (role && !['mahasiswa', 'admin'].includes(role)) {
       return res.status(400).json({ message: "Role tidak valid. Harus 'mahasiswa' atau 'admin'." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10); 
     const newUser = await User.create({
-      nama,
+      // KOREKSI 3: Pastikan dikirim ke database sebagai 'nama' (jika model Anda mengharapkan 'nama')
+      nama: name, 
       email,
       password: hashedPassword,
       role: role || 'mahasiswa' 
