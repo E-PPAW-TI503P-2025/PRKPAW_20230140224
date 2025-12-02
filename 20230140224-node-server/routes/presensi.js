@@ -1,29 +1,29 @@
 const express = require("express");
 const router = express.Router();
 const presensiController = require("../controllers/presensiController");
-//const { addUserData, isAdmin } = require("../middleware/authMiddleware");
-const { addUserData, isAdmin } = require('../middleware/permissionMiddleware');
-
-
-// 🔹 Middleware global agar setiap request punya data user dummy
-router.use(addUserData);
+const { protect, addUserData, isAdmin } = require("../middleware/permissionMiddleware");
 
 // ============================
 // ENDPOINT PRESENSI
 // ============================
 
-// Check-in & Check-out
-router.post("/checkin", presensiController.CheckIn);
-router.post("/checkout", presensiController.CheckOut);
+// ✔ Protect dulu supaya req.user tersedia
+// ✔ Upload setelah protect supaya req.user.id bisa dipakai
+router.post(
+  "/checkin",
+  protect,
+  addUserData,
+  presensiController.upload.single("buktiFoto"),
+  presensiController.CheckIn
+);
 
-// Update data (PUT)
-router.put("/:id", presensiController.updatePresensi);
+router.post("/checkout", protect, addUserData, presensiController.CheckOut);
 
-// Delete data (Admin boleh hapus siapa pun)
-router.delete("/:id", isAdmin, presensiController.deletePresensi);
+router.put("/:id", protect, presensiController.updatePresensi);
 
-// Search
-router.get("/search/nama", presensiController.searchByName);
-router.get("/search/tanggal", presensiController.searchByDate);
+router.delete("/:id", protect, isAdmin, presensiController.hapusPresensi);
+
+router.get("/search/nama", protect, presensiController.searchByName);
+router.get("/search/tanggal", protect, presensiController.searchByDate);
 
 module.exports = router;
