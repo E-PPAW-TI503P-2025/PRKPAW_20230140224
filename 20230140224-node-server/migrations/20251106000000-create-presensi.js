@@ -1,44 +1,43 @@
-'use strict';
+"use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Presensis', {
+    await queryInterface.createTable("Presensis", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
-      userId: { // <-- Diperbaiki menjadi Foreign Key
+      userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Users", // Merujuk ke tabel 'Users'
+          model: "Users",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      // Hapus kolom 'nama'
       checkIn: {
+        type: Sequelize.DATE,
         allowNull: false,
-        type: Sequelize.DATE
       },
       checkOut: {
+        type: Sequelize.DATE,
         allowNull: true,
-        type: Sequelize.DATE
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Presensis');
-  }
+    await queryInterface.dropTable("Presensis");
+  },
 };

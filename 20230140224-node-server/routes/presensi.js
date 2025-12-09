@@ -1,29 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const presensiController = require("../controllers/presensiController");
-const { protect, addUserData, isAdmin } = require("../middleware/permissionMiddleware");
+const { authenticateToken } = require("../middleware/permissionMiddleware");
 
-// ============================
-// ENDPOINT PRESENSI
-// ============================
+router.use(authenticateToken);
 
-// ✔ Protect dulu supaya req.user tersedia
-// ✔ Upload setelah protect supaya req.user.id bisa dipakai
 router.post(
-  "/checkin",
-  protect,
-  addUserData,
-  presensiController.upload.single("buktiFoto"),
+  "/check-in",
+  [authenticateToken, presensiController.upload.single("image")],
   presensiController.CheckIn
 );
 
-router.post("/checkout", protect, addUserData, presensiController.CheckOut);
+router.post("/check-out", presensiController.CheckOut);
 
-router.put("/:id", protect, presensiController.updatePresensi);
+router.put("/:id", presensiController.updatePresensi);
 
-router.delete("/:id", protect, isAdmin, presensiController.hapusPresensi);
-
-router.get("/search/nama", protect, presensiController.searchByName);
-router.get("/search/tanggal", protect, presensiController.searchByDate);
+router.delete("/:id", presensiController.hapusPresensi);
 
 module.exports = router;

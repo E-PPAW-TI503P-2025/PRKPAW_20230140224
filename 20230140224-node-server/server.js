@@ -1,72 +1,51 @@
+require("dotenv").config();
+console.log("Nilai JWT_SECRET di server.js:", process.env.JWT_SECRET);
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
-const morgan = require("morgan");
 const app = express();
 const PORT = 3001;
-const authRoutes = require ('./routes/auth')
+const morgan = require("morgan");
+const path = require("path"); //ini
 
-// Middleware
-
-// BARIS INI DIGANTI DENGAN KONFIGURASI CORS SPESIFIK:
-app.use(cors({
-    origin: 'http://localhost:3000', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-}));
-// --- AWAL KODE ASLI YANG HILANG/TERGESER ---
-// app.use(cors()); // <--- BARIS INI HILANG ATAU DIKOMENTARI
-app.use(bodyParser.json());
-app.use(express.json());
-app.use(morgan("dev"));
-app.use('/api/auth',authRoutes);
-
-// Konfigurasi CORS yang salah posisi (SEKARANG BARIS INI DIHAPUS):
-/*
-app.use(cors({
-    origin: 'http://localhost:3000', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-}));
-*/
-// --- AKHIR KODE ASLI YANG HILANG/TERGESER ---
-
-// Logging tambahan (optional)
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
-
-// Rute Root
-app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Selamat datang di API Server Book & Presensi!",
-    availableEndpoints: ["/api/books", "/api/presensi", "/api/reports"],
-  });
-});
-
-// Routing lama (books)
-const bookRoutes = require("./routes/books");
-app.use("/api/books", bookRoutes);
-
-// Routing baru dari modul
+// Impor router
 const presensiRoutes = require("./routes/presensi");
 const reportRoutes = require("./routes/reports");
+
+const authRoutes = require("./routes/auth"); // <-- Impor rute auth
+
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); //ini
+
+
+
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
+
+app.use(morgan("dev"));
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+app.get("/", (req, res) => {
+  res.send("Home Page for API");
+});
+
+const ruteBuku = require("./routes/books");
+
+app.use("/api/books", ruteBuku);
+
 app.use("/api/presensi", presensiRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/auth", authRoutes); // <-- Daftarkan rute /api/auth
 
-// 404 Handler
-app.use((req, res, next) => {
-  res.status(404).json({ message: "Endpoint tidak ditemukan" });
-});
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+//app.use("/api/iot", iotRoutes);
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-  console.error("Terjadi error:", err.stack);
-  res.status(500).json({ message: "Terjadi kesalahan pada server" });
-});
-
-// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}/`);
+  console.log(`Express server running at http://localhost:${PORT}/`);
 });
