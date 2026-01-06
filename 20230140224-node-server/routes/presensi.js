@@ -16,5 +16,6 @@ router.post("/check-out", presensiController.CheckOut);
 router.put("/:id", presensiController.updatePresensi);
 
 router.delete("/:id", presensiController.hapusPresensi);
+router.post('/check-in', [authenticateToken, presensiController.upload.single('image')], presensiController.CheckIn);
 
 module.exports = router;
